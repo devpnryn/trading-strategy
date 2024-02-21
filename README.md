@@ -3,10 +3,12 @@
 
 This Python script is designed to perform a detailed comparison of stock market performances, focusing on the top 25 performing stocks from the S&P 500 index against the overall S&P 500 returns on a quarterly basis over the past decade. The analysis aims to identify trends and the potential for higher returns by investing in these top performers compared to the broader market.
 
+
+
 ## Analysis Procedure
 
 1. **Data Collection:**
-   - For each year from 2019 to 2023, identify the top 25 performing stocks from the S&P 500's historical components.
+   - For each year from 2018 to 2023, identify the top 25 performing stocks from the S&P 500's historical components.
    - Calculate the average annual percentage change for each stock.
    - Obtain the S&P 500 (GSPC) returns for the same years.
 
@@ -17,6 +19,9 @@ This Python script is designed to perform a detailed comparison of stock market 
 
 4. **Investment Simulation:**
    - Simulate the investment of $1,000,000 in both the top-25 stocks and the S&P 500 index, tracking their performance (not included in the analysis as of now).
+
+
+
 
 ## Features
 
@@ -34,8 +39,28 @@ To run this script, you need Python 3.x and the following packages:
 You can install the dependencies with the following command:
 
 ```bash
-pip install yfinance pandas matplotlib
+pip install -r requirements.txt
 ```
+## Project Structure
+
+The project structure is as follows:
+
+```
+   ├── data
+   │   └── S&P 500 Historical Components & Changes(12-30-2023).csv
+   │   └── sp_tickers_2023.csv
+   ├── docs
+   │   └── project_documentation.md
+   ├── src
+   │   └── stock_analysis.py
+   ├── tests
+   │   └── test_module.py
+   ├── LICENSE
+   ├── README.md
+   └── requirements.txt
+   └── ticker_errors.log
+   ```
+
 
 ## Input File
 
@@ -79,10 +104,25 @@ This project builds upon the work done in [sp500](https://github.com/username/re
 One of the data files used in this project, `S&P 500 Historical Components & Changes(12-30-2023).csv`, has been directly utilized from [sp500](https://github.com/fja05680/sp500) to ensure consistency and reliability in data reference. We acknowledge and appreciate the original work and have included it with due respect to its author(s).
 
 
+## Limitations
+
+1. **Error Handling:**
+   There are several errors unhandled. Its a rough draft. Given my expertise in python, I don't know how to optimize this further like better logging and errro handling. 
+
+2. **Full Data:**
+   I didn't run this for one decade as I wanted to keep the data size small. I have run this for 2018-2023.
+
+3. **Plotting:**
+   Plots are basic. nothing fancy. If you like, you can customise them get as much as possible visualisations fromt the dataset.
+
+4. **Investment Simulation:**
+   Finally, I didn't run this data through simulation with investment data like for example, how much I would have earned in 2022 had I invested 1 million into the top25 identified stocks vs S&P500 stock. 
+
+   
 
 ## Contributing
 
-Feel free to fork the repository and submit pull requests.
+Feel free to fork the repository and submit pull requests. I am opne to suggestions and contributions. 
 
 ## License
 
