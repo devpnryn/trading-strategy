@@ -32,6 +32,7 @@ This Python script is designed to perform a detailed comparison of stock market 
 ## Installation
 
 To run this script, you need Python 3.x and the following packages:
+- logging
 - yfinance
 - pandas
 - matplotlib
