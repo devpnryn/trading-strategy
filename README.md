@@ -71,6 +71,15 @@ Modify the `ticker`, `start_year`, and `end_year` variables in the script to ana
 python stock_analysis.py
 ```
 
+## Acknowledgments and References
+
+This project builds upon the work done in [sp500](https://github.com/username/repository), courtesy of [fja05680](https://github.com/fja05680). Special thanks to him/her for the valuable contributions to the community.
+
+### Note on Data Reference
+One of the data files used in this project, `S&P 500 Historical Components & Changes(12-30-2023).csv`, has been directly utilized from [sp500](https://github.com/fja05680/sp500) to ensure consistency and reliability in data reference. We acknowledge and appreciate the original work and have included it with due respect to its author(s).
+
+
+
 ## Contributing
 
 Feel free to fork the repository and submit pull requests.
