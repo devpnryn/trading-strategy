@@ -1,61 +1,39 @@
-
+import logging
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def read_file_contents(filename):
-    """Reads the input CSV file containing tickers for each year."""
-    return pd.read_csv(filename)
-
-
-def get_tickers_with_sp(tickers):
-    """Appends S&P 500 index to the list of tickers for each year."""
-    full_tickers = tickers[0].split(',')
-    full_tickers.append('^GSPC')
-    return full_tickers
-
-
-def download_data_for_tickers(tickers, start_year, end_year):
-    """Downloads yearly data for given tickers."""
+def get_tickers_data_by_year(tickers, year):
     historical_data_dict = {}
-    for ticker in tickers[495:]:
-        # Ensure every year is initialized for the ticker
-        if ticker not in historical_data_dict:
-            historical_data_dict[ticker] = {
-                str(year): None for year in range(start_year, end_year + 1)}
-        for year in range(start_year, end_year + 1):
-            try:
-                # Download data for the start and end of each year from 2020 to 2025
-                for year in range(start_year, end_year + 1):
-                    start_date = f"{year}-01-01"
-                    end_date = f"{year}-12-31"
-                    historical_data = yf.Ticker(ticker).history(
-                        interval='1mo', start=start_date, end=end_date)['Close']
-
-                    print(f"Downloaded data for {ticker} in {year}")
-
-                    if not historical_data.empty and len(historical_data) >= 12:
-                        # Calculate the percentage change from the first to the last month
-                        first_price = historical_data.iloc[0]
-                        # Assuming the last index is December
-                        last_price = historical_data.iloc[-1]
-                        percentage_change = (
-                            (last_price - first_price) / first_price) * 100
-                        historical_data_dict[ticker][str(
-                            year)] = percentage_change
-                    else:
-                        print(f"Not enough data for {ticker} in {year}")
-
-            except Exception as e:
-                print(f"Error fetching data for {ticker}: {e}")
-                historical_data_dict[ticker][str(year)] = None
-                continue
-
+    # No longer limiting to the first 5 tickers for broader applicability
+    # for ticker in tickers[-100:]:
+    for ticker in tickers:
+        try:
+            start_date = f"{year}-01-01"
+            end_date = f"{year}-12-31"
+            historical_data = yf.Ticker(ticker).history(
+                interval='1mo', start=start_date, end=end_date)['Close']
+            print(f"{ticker}: data downloaded...")
+            if not historical_data.empty and len(historical_data) >= 12:
+                first_price = historical_data.iloc[0]
+                last_price = historical_data.iloc[-1]
+                percentage_change = (
+                    (last_price - first_price) / first_price) * 100
+                historical_data_dict[ticker] = percentage_change
+            else:
+                print(f"{ticker} has less than 12 months of data.")
+                historical_data_dict[ticker] = None
+        except Exception as e:
+            error_message = f"Error for {ticker} in {year}: {e}. Skipping..."
+            print(error_message)
+            logging.error(error_message)  # Log the error
+            historical_data_dict[ticker] = None
     return historical_data_dict
 
 
-def modify_data_and_save(data, op_file):
+def get_tickers_data_by_years(start_year, end_year, tickers_filename):
+    """Downloads yearly data for given tickers."""
     """Generates a DataFrame from the historical data dictionary.
 
         Ticker | 2020   | 2021   | 2022   | 2023
@@ -72,17 +50,25 @@ def modify_data_and_save(data, op_file):
         columns: ['Ticker', '2020', '2021', '2022', '2023']
         rows: [s&p stocks + GSPC (S&P 500)]
     """
-    df = pd.DataFrame.from_dict(data, orient='index')
-    df.reset_index(inplace=True)
-    df.rename(columns={'index': 'Ticker'}, inplace=True)
+    all_data = {}
 
-    # Reordering DataFrame columns to match required format
-    years = [str(year) for year in range(start_year, end_year + 1)]
-    df = df[['Ticker'] + years]
+    # Iterate over each year, fetching tickers dynamically
+    for year in range(start_year, end_year+1):
+        tickers = get_tickers_by_year(tickers_filename, year)
+        yearly_data = get_tickers_data_by_year(tickers, year)
+        for ticker, change in yearly_data.items():
+            if ticker not in all_data:
+                all_data[ticker] = {}
+            all_data[ticker][year] = change
 
-    # Save the combined data to a CSV file
-    df.to_csv(op_file)
-    return df
+    # Convert the nested dictionary into a DataFrame
+    final_df = pd.DataFrame.from_dict(all_data, orient='index')
+    final_df.columns = [str(year) for year in range(start_year, end_year+1)]
+
+    # Reset index to turn the tickers into a column
+    final_df.reset_index(inplace=True)
+    final_df.rename(columns={'index': 'Ticker'}, inplace=True)
+    return final_df
 
 
 def generate_yearly_top25_dataframe(df, start_year, end_year):
@@ -138,37 +124,31 @@ def get_tickers_by_year(filename, year):
     df = pd.read_csv(filename)
     df['date'] = pd.to_datetime(df['date'])
     df = df[df['date'].dt.year == year]
-    # print(df.head(1)['tickers'])
-    return df.head(1)['tickers']
+    tickers = df.head(1)['tickers'].values[0].split(',')
+    tickers.append('^GSPC')
+    # print(tickers)
+    return tickers
 
 
-# Example usage
 if __name__ == "__main__":
+
+    # Configure logging
+    logging.basicConfig(filename='ticker_errors.log', level=logging.ERROR,
+                        format='%(asctime)s:%(levelname)s:%(message)s')
+
     filename = 'data/sp_tickers_2023.csv'
-    fulldata = 'S&P 500 Historical Components & Changes(12-30-2023).csv'
+    tickers_data = 'data/S&P 500 Historical Components & Changes(12-30-2023).csv'
     op_file = 'data/stock_analysis.csv'
     start_year = 2018
-    end_year = 2019
-    tickers_list_2018 = get_tickers_by_year(fulldata, start_year)
-    tickers_list_2019 = get_tickers_by_year(fulldata, end_year)
-
-    # diff_tickers = set(tickers_list_2018.values[0].split(',')).difference(
-    #     set(tickers_list_2019.values[0].split(',')))
-    # print(diff_tickers)
-
-    input_df = read_file_contents(filename)
-    full_tickers_list = get_tickers_with_sp(input_df['tickers'])
-    data = download_data_for_tickers(full_tickers_list, start_year, end_year)
-    df = modify_data_and_save(data, op_file)
+    end_year = 2023
+    final_data = get_tickers_data_by_years(start_year, end_year, tickers_data)
+    final_data.to_csv(op_file)
 
     # read the finalized data(saved to disk)
-    yearly_df = read_file_contents(op_file)
+    yearly_df = pd.read_csv(op_file)
 
     top25_with_gspc_df = generate_yearly_top25_dataframe(
         yearly_df, start_year, end_year)
 
-    # plot yearly top 25 performers vs GSPC
-    plot_top25_vs_sp(top25_with_gspc_df, 2018)
-    # plot_top25_vs_sp(top25_with_gspc_df, 2019)
-    # plot_top25_vs_sp(top25_with_gspc_df, 2020)
-    # plot_top25_vs_sp(top25_with_gspc_df, 2020)
+    # plot yearly top 25 performers vs GSPC: for example 2020
+    plot_top25_vs_sp(top25_with_gspc_df, 2020)
