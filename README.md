@@ -69,9 +69,11 @@ The project structure is as follows:
    ├── tests
    │   └── validate_data.py
    ├── LICENSE
+   ├── .gitignore
+   ├── app.yaml
    ├── README.md
    └── requirements.txt
-   └── ticker_errors.log
+   
    ```
 
 
