@@ -1,3 +1,4 @@
+import datetime
 import logging
 import yfinance as yf
 import pandas as pd
@@ -15,7 +16,7 @@ def get_tickers_data_by_year(tickers, year):
             historical_data = yf.Ticker(ticker).history(
                 interval='1mo', start=start_date, end=end_date)['Close']
             print(f"{ticker}: data downloaded...")
-            if not historical_data.empty and len(historical_data) >= 12:
+            if not historical_data.empty and len(historical_data) > 12:
                 first_price = historical_data.iloc[0]
                 last_price = historical_data.iloc[-1]
                 percentage_change = (
@@ -133,8 +134,12 @@ def get_tickers_by_year(filename, year):
 if __name__ == "__main__":
 
     # Configure logging
-    logging.basicConfig(filename='ticker_errors.log', level=logging.ERROR,
+    logging.basicConfig(filename=f'logs/tickers_download_{datetime.datetime.now()}.log', level=logging.INFO,
                         format='%(asctime)s:%(levelname)s:%(message)s')
+    start_time = datetime.datetime.now()
+
+    # Start the program
+    logging.info(f"Starting the program at {start_time}")
 
     filename = 'data/sp_tickers_2023.csv'
     tickers_data = 'data/S&P 500 Historical Components & Changes(12-30-2023).csv'
@@ -152,3 +157,6 @@ if __name__ == "__main__":
 
     # plot yearly top 25 performers vs GSPC: for example 2020
     plot_top25_vs_sp(top25_with_gspc_df, 2020)
+
+    logging.info(f"Finished the program at {datetime.datetime.now()}")
+    logging.info(f"Total time taken: {datetime.datetime.now() - start_time}")
