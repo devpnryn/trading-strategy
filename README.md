@@ -32,6 +32,7 @@ This Python script is designed to perform a detailed comparison of stock market 
 ## Installation
 
 To run this script, you need Python 3.x and the following packages:
+- logging
 - yfinance
 - pandas
 - matplotlib
@@ -47,14 +48,26 @@ The project structure is as follows:
 
 ```
    ├── data
+   |   └── final_data
+   |   |   └── 2018_2023_stock_analysis.csv
+   |   └── raw_data
+   |   |   └── raw_data_2018.csv
+   |   |   └── raw_data_2019.csv
+   |   |   └── raw_data_2020.csv
+   |   |   └── raw_data_2021.csv
+   |   |   └── raw_data_2022.csv
+   |   |   └── raw_data_2023.csv
    │   └── S&P 500 Historical Components & Changes(12-30-2023).csv
-   │   └── sp_tickers_2023.csv
+   ├── logs
+   │   └── trickers_download_timestamp.log
+   |   └── data_compare_timestamp.log
    ├── docs
    │   └── project_documentation.md
    ├── src
    │   └── stock_analysis.py
+   |   └── stock_analysis_v3.py
    ├── tests
-   │   └── test_module.py
+   │   └── validate_data.py
    ├── LICENSE
    ├── README.md
    └── requirements.txt
@@ -92,9 +105,31 @@ GOOGL  | 180.65 | 180.65 | 180.65 | 180.65
 
 Modify the `ticker`, `start_year`, and `end_year` variables in the script to analyze different stocks and time periods. Then run the script:
 
+To download tickers in bulk:
 ```bash
-python stock_analysis.py
+python src/stock_analysis_v3.py
 ```
+or 
+To download tickers one by one 
+```bash
+python src/stock_analysis.py
+```
+
+## Testing
+There are no tests per say but to test the downloaded data (via /src/stock_analysis_v3.py), run the following command:
+
+```bash
+python tests/validate_data.py
+```
+The above script checks one by one ticker data again makeing calls  to Yahoo Finance to get the data.  
+### Note
+This comparison only works if the data is downloaded and saved in the final_data folder.
+
+## Logs
+basic logging is configured in the script to log the time of data download and data comparisons. Logs are timestamped files and gets created in the logs directory.
+
+Data comparison logs are going to give success and failed lists of tickers.
+
 
 ## Acknowledgments and References
 
